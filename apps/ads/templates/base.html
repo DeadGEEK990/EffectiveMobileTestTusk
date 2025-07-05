@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Тестовое задание для Effective Mobile{% endblock %}</title>
+    <style>
+        body {
+            background: #f0f4f8;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            margin: 0;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .nav-buttons button {
+            background: #4a6fa5;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .nav-buttons button:hover {
+            background: #3a5a80;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="nav-buttons">
+        <button onclick="location.href='/'">Главная страница</button>
+        <button onclick="location.href='/my-items/'">Мои товары</button>
+        <button onclick="location.href='/my-requests/'">Мои запросы</button>
+        <button onclick="location.href='/received-requests/'">Присланные запросы</button>
+    </div>
+
+    {% block content %}{% endblock %}
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

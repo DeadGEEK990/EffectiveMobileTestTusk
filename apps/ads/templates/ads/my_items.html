@@ -1,0 +1,634 @@
+{% extends "base.html" %}
+
+{% block title %}Мои товары{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Все стили остаются без изменений */
+    .page-container {
+        margin-top: 20px;
+    }
+    .main-content {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    .items-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    .item-card {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+    .item-card img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 4px;
+        margin-bottom: 10px;
+    }
+    .item-card h3 {
+        margin: 0 0 10px 0;
+        font-size: 1.1rem;
+    }
+    .item-card p {
+        margin: 5px 0;
+        color: #555;
+        font-size: 0.9rem;
+    }
+    .item-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: auto;
+        padding-top: 10px;
+    }
+    .delete-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .edit-btn {
+        background: #ffc107;
+        color: #000;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .loading {
+        text-align: center;
+        padding: 20px;
+        font-size: 1.2rem;
+        color: #666;
+    }
+    .error-message {
+        color: #dc3545;
+        padding: 10px;
+        background: #ffecec;
+        border-radius: 4px;
+        margin: 10px 0;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+        background-color: #fff;
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 80%;
+        max-width: 500px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .modal-header h2 {
+        margin: 0;
+    }
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    .form-actions button {
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .form-actions button[type="submit"] {
+        background: #28a745;
+        color: white;
+        border: none;
+    }
+    .add-item-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+        cursor: pointer;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .edit-modal {
+        display: none;
+        position: fixed;
+        z-index: 1001;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    .edit-modal-content {
+        background-color: #fff;
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 80%;
+        max-width: 500px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="main-content">
+        <div id="loading-indicator" class="loading">Загрузка ваших товаров...</div>
+        <div id="error-container" class="error-message" style="display: none;"></div>
+        <div class="items-grid" id="items-container"></div>
+    </div>
+</div>
+
+<button id="addItemBtn" class="add-item-btn" title="Добавить товар">+</button>
+
+<!-- Модальное окно создания товара -->
+<div id="createItemModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Добавить новый товар</h2>
+            <button class="close-btn">&times;</button>
+        </div>
+        <form id="createItemForm">
+            <div class="form-group">
+                <label for="title">Название товара</label>
+                <input type="text" id="title" name="title" required maxlength="50">
+            </div>
+            <div class="form-group">
+                <label for="description">Описание</label>
+                <textarea id="description" name="description" required maxlength="500" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="image_url">Ссылка на изображение</label>
+                <input type="url" id="image_url" name="image_url" required>
+            </div>
+            <div class="form-group">
+                <label for="category">Категория</label>
+                <select id="category" name="category" required>
+                    <option value="">Выберите категорию</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="condition">Состояние</label>
+                <select id="condition" name="condition" required>
+                    <option value="new">Новый</option>
+                    <option value="old">Б/у</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="close-btn">Отмена</button>
+                <button type="submit">Создать товар</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно редактирования товара -->
+<div id="editItemModal" class="edit-modal">
+    <div class="edit-modal-content">
+        <div class="modal-header">
+            <h2>Редактировать товар</h2>
+            <button class="close-edit-btn">&times;</button>
+        </div>
+        <form id="editItemForm">
+            <input type="hidden" id="edit-item-id">
+            <div class="form-group">
+                <label for="edit-title">Название товара</label>
+                <input type="text" id="edit-title" name="title" required maxlength="50">
+            </div>
+            <div class="form-group">
+                <label for="edit-description">Описание</label>
+                <textarea id="edit-description" name="description" required maxlength="500" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="edit-image-url">Ссылка на изображение</label>
+                <input type="url" id="edit-image-url" name="image_url" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-category">Категория</label>
+                <select id="edit-category" name="category" required>
+                    <option value="">Выберите категорию</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="edit-condition">Состояние</label>
+                <select id="edit-condition" name="condition" required>
+                    <option value="new">Новый</option>
+                    <option value="old">Б/у</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="close-edit-btn">Отмена</button>
+                <button type="submit">Сохранить изменения</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const API = {
+            items: '/api/v1/my-items/',
+            categories: '/api/v1/categories/',
+            currentUser: '/api/v1/current-user/'
+        };
+
+        const elements = {
+            container: document.getElementById('items-container'),
+            loading: document.getElementById('loading-indicator'),
+            error: document.getElementById('error-container'),
+            addBtn: document.getElementById('addItemBtn'),
+            modal: document.getElementById('createItemModal'),
+            form: document.getElementById('createItemForm'),
+            categorySelect: document.getElementById('category'),
+            editModal: document.getElementById('editItemModal'),
+            editForm: document.getElementById('editItemForm'),
+            editItemId: document.getElementById('edit-item-id'),
+            editTitle: document.getElementById('edit-title'),
+            editDescription: document.getElementById('edit-description'),
+            editImageUrl: document.getElementById('edit-image-url'),
+            editCategory: document.getElementById('edit-category'),
+            editCondition: document.getElementById('edit-condition'),
+            closeEditBtns: document.querySelectorAll('.close-edit-btn')
+        };
+
+        const state = {
+            currentUserId: null,
+            currentUserItems: []
+        };
+
+        const utils = {
+            showLoading: () => {
+                elements.loading.style.display = 'block';
+                elements.error.style.display = 'none';
+                elements.container.innerHTML = '';
+            },
+            hideLoading: () => {
+                elements.loading.style.display = 'none';
+            },
+            showError: (message) => {
+                elements.error.style.display = 'block';
+                elements.error.textContent = message;
+            },
+            handleApiError: (error) => {
+                console.error('API Error:', error);
+                let errorMessage = 'Произошла ошибка';
+
+                if (error.message) {
+                    if (typeof error.message === 'object') {
+                        errorMessage = Object.entries(error.message)
+                            .map(([field, errors]) => {
+                                if (Array.isArray(errors)) {
+                                    return `${field}: ${errors.join(', ')}`;
+                                }
+                                return `${field}: ${errors}`;
+                            })
+                            .join('; ');
+                    } else {
+                        errorMessage = error.message;
+                    }
+                }
+
+                utils.showError(errorMessage);
+                if (error.status === 401) {
+                    window.location.href = '/login/';
+                }
+            },
+            closeAllModals: () => {
+                elements.modal.style.display = 'none';
+                elements.editModal.style.display = 'none';
+            }
+        };
+
+        const api = {
+            getCurrentUser: async () => {
+                const response = await fetch(API.currentUser, { credentials: 'include' });
+                if (!response.ok) {
+                    throw {
+                        message: response.status === 401 ? 'Требуется авторизация' : 'Ошибка сервера',
+                        status: response.status
+                    };
+                }
+                return await response.json();
+            },
+            getUserItems: async (userId) => {
+                const response = await fetch(`${API.items}?user=${userId}`, { credentials: 'include' });
+                if (!response.ok) {
+                    throw { message: 'Не удалось загрузить товары', status: response.status };
+                }
+                return await response.json();
+            },
+            getCategories: async () => {
+                const response = await fetch(API.categories, { credentials: 'include' });
+                if (!response.ok) {
+                    throw { message: 'Не удалось загрузить категории', status: response.status };
+                }
+                return await response.json();
+            },
+            createItem: async (itemData) => {
+                const csrfToken = document.cookie.split('; ')
+                    .find(row => row.startsWith('csrftoken='))
+                    ?.split('=')[1] || '';
+
+                const response = await fetch(API.items, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        title: itemData.title,
+                        description: itemData.description,
+                        image_url: itemData.image_url,
+                        category: itemData.category,
+                        condition: itemData.condition
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw { message: errorData, status: response.status };
+                }
+                return await response.json();
+            },
+            updateItem: async (itemId, itemData) => {
+                const csrfToken = document.cookie.split('; ')
+                    .find(row => row.startsWith('csrftoken='))
+                    ?.split('=')[1] || '';
+
+                // Обрабатываем категорию - если это объект, берем только ID
+                if (itemData.category && typeof itemData.category === 'object') {
+                    itemData.category = itemData.category.id;
+                }
+
+                const response = await fetch(`${API.items}${itemId}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(itemData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw { message: errorData, status: response.status };
+                }
+                return await response.json();
+            },
+            deleteItem: async (itemId) => {
+                const csrfToken = document.cookie.split('; ')
+                    .find(row => row.startsWith('csrftoken='))
+                    ?.split('=')[1] || '';
+
+                const response = await fetch(`${API.items}${itemId}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw { message: errorData, status: response.status };
+                }
+            }
+        };
+
+        const ui = {
+            renderItems: (items) => {
+                state.currentUserItems = items;
+
+                if (items.length === 0) {
+                    elements.container.innerHTML = `
+                        <div class="empty-state">
+                            <h3>У вас пока нет товаров</h3>
+                            <p>Нажмите на кнопку "+" чтобы добавить первый товар</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                elements.container.innerHTML = items.map(item => `
+                    <div class="item-card">
+                        <img src="${item.image_url}" alt="${item.title}" onerror="this.onerror=null;this.src='https://via.placeholder.com/150?text=No+Image'">
+                        <h3>${item.title}</h3>
+                        <p>${item.description}</p>
+                        <p>Категория: ${item.category?.title || 'Без категории'}</p>
+                        <p>Состояние: ${item.condition === 'new' ? 'Новый' : 'Б/у'}</p>
+                        <p>Добавлено: ${new Date(item.created_at).toLocaleDateString()}</p>
+                        <div class="item-actions">
+                            <button class="edit-btn" data-id="${item.id}">Редактировать</button>
+                            <button class="delete-btn" data-id="${item.id}">Удалить</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Обработчики для кнопок удаления
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const itemId = btn.dataset.id;
+                        if (confirm('Вы уверены, что хотите удалить этот товар?')) {
+                            try {
+                                await api.deleteItem(itemId);
+                                await loadData();
+                            } catch (error) {
+                                utils.handleApiError(error);
+                            }
+                        }
+                    });
+                });
+
+                // Обработчики для кнопок редактирования
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const itemId = btn.dataset.id;
+                        const item = state.currentUserItems.find(i => i.id == itemId);
+
+                        if (!item) {
+                            utils.showError('Товар не найден');
+                            return;
+                        }
+
+                        try {
+                            elements.editItemId.value = item.id;
+                            elements.editTitle.value = item.title;
+                            elements.editDescription.value = item.description;
+                            elements.editImageUrl.value = item.image_url;
+                            elements.editCondition.value = item.condition;
+
+                            const categories = await api.getCategories();
+                            elements.editCategory.innerHTML = `
+                                <option value="">Выберите категорию</option>
+                                ${categories.map(cat => `
+                                    <option value="${cat.id}" ${cat.id === (item.category?.id || item.category) ? 'selected' : ''}>
+                                        ${cat.title}
+                                    </option>
+                                `).join('')}
+                            `;
+
+                            elements.editModal.style.display = 'block';
+                        } catch (error) {
+                            utils.handleApiError(error);
+                        }
+                    });
+                });
+            },
+            initModals: () => {
+                // Модальное окно создания
+                elements.addBtn.addEventListener('click', async () => {
+                    try {
+                        const categories = await api.getCategories();
+                        elements.categorySelect.innerHTML = `
+                            <option value="">Выберите категорию</option>
+                            ${categories.map(cat => `
+                                <option value="${cat.id}">${cat.title}</option>
+                            `).join('')}
+                        `;
+                        elements.modal.style.display = 'block';
+                    } catch (error) {
+                        utils.handleApiError(error);
+                    }
+                });
+
+                // Закрытие модальных окон
+                document.querySelectorAll('.close-btn, .close-edit-btn').forEach(btn => {
+                    btn.addEventListener('click', utils.closeAllModals);
+                });
+
+                // Закрытие при клике вне модального окна
+                [elements.modal, elements.editModal].forEach(modal => {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            utils.closeAllModals();
+                        }
+                    });
+                });
+
+                // Обработка формы создания
+                elements.form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(elements.form);
+
+                    try {
+                        await api.createItem({
+                            title: formData.get('title'),
+                            description: formData.get('description'),
+                            image_url: formData.get('image_url'),
+                            category: parseInt(formData.get('category')),
+                            condition: formData.get('condition')
+                        });
+                        utils.closeAllModals();
+                        elements.form.reset();
+                        await loadData();
+                    } catch (error) {
+                        utils.handleApiError(error);
+                    }
+                });
+
+                // Обработка формы редактирования
+                elements.editForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const itemData = {
+                        title: elements.editTitle.value,
+                        description: elements.editDescription.value,
+                        image_url: elements.editImageUrl.value,
+                        category: elements.editCategory.value ? parseInt(elements.editCategory.value) : null,
+                        condition: elements.editCondition.value
+                    };
+
+                    try {
+                        await api.updateItem(elements.editItemId.value, itemData);
+                        utils.closeAllModals();
+                        await loadData();
+                    } catch (error) {
+                        utils.handleApiError(error);
+                    }
+                });
+            }
+        };
+
+        async function loadData() {
+            try {
+                utils.showLoading();
+                const user = await api.getCurrentUser();
+                state.currentUserId = user.id;
+
+                const itemsData = await api.getUserItems(state.currentUserId);
+                ui.renderItems(itemsData.results || itemsData);
+            } catch (error) {
+                utils.handleApiError(error);
+            } finally {
+                utils.hideLoading();
+            }
+        }
+
+        ui.initModals();
+        loadData();
+    });
+</script>
+{% endblock %}

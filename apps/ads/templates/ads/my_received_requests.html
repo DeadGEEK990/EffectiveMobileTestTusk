@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Присланные запросы{% endblock %}
+
+{% block content %}
+    <h1>Присланные запросы</h1>
+    <div id="requests-container"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch("/api/v1/exchange-proposals/received/")
+            .then(response => {
+                if (!response.ok) throw new Error("Ошибка получения данных");
+                return response.json();
+            })
+            .then(data => renderRequests(data))
+            .catch(error => console.error("Ошибка при получении запросов:", error));
+    });
+
+    function renderRequests(requests) {
+        // Фильтруем только accepted и pending
+        const filteredRequests = requests.filter(r => r.status === "pending" || r.status === "accepted");
+
+        const container = document.getElementById("requests-container");
+        container.innerHTML = ""; // очистка перед отрисовкой
+
+        if (filteredRequests.length === 0) {
+            container.innerHTML = "<p>Нет присланных запросов.</p>";
+            return;
+        }
+
+        filteredRequests.forEach(request => {
+            const card = document.createElement("div");
+            card.style = "background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);";
+
+            card.innerHTML = `
+                <p><strong>Комментарий:</strong> ${request.comment || "Без комментария"}</p>
+                <p><strong>Статус:</strong> ${translateStatus(request.status)}</p>
+                <div style="display: flex; gap: 20px; margin-top: 10px;">
+                    <div>
+                        <p><strong>Предложенный товар:</strong></p>
+                        <img src="${request.ad_sender.image_url}" alt="Товар отправителя" width="100"/>
+                        <p>${request.ad_sender.title}</p>
+                    </div>
+                    <div>
+                        <p><strong>Ваш товар:</strong></p>
+                        <img src="${request.ad_receiver.image_url}" alt="Ваш товар" width="100"/>
+                        <p>${request.ad_receiver.title}</p>
+                    </div>
+                </div>
+            `;
+
+            if (request.status === "pending") {
+                const acceptButton = document.createElement("button");
+                acceptButton.innerText = "Принять";
+                acceptButton.style = "margin-right: 10px; background: #4CAF50; color: white; border: none; padding: 8px 12px; cursor: pointer;";
+                acceptButton.onclick = () => respondToRequest(request.id, "accept");
+
+                const declineButton = document.createElement("button");
+                declineButton.innerText = "Отклонить";
+                declineButton.style = "background: #f44336; color: white; border: none; padding: 8px 12px; cursor: pointer;";
+                declineButton.onclick = () => respondToRequest(request.id, "decline");
+
+                const buttonWrapper = document.createElement("div");
+                buttonWrapper.style = "margin-top: 15px;";
+                buttonWrapper.appendChild(acceptButton);
+                buttonWrapper.appendChild(declineButton);
+
+                card.appendChild(buttonWrapper);
+            }
+
+            container.appendChild(card);
+        });
+    }
+
+    function respondToRequest(id, action) {
+        fetch(`/api/v1/exchange-proposals/${id}/${action}/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                response.json().then(data => {
+                    alert(data.detail || "Ошибка при обработке запроса");
+                });
+            }
+        })
+        .catch(error => {
+            alert("Ошибка отправки запроса: " + error.message);
+        });
+    }
+
+    function translateStatus(status) {
+        switch (status) {
+            case "pending": return "Ожидает";
+            case "accepted": return "Принято";
+            case "declined": return "Отклонено";
+            default: return status;
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + "=")) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}
+
+
+

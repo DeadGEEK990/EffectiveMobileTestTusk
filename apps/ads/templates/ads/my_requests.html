@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Мои запросы на обмен{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        margin-top: 20px;
+    }
+    .main-content {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    .request-card {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+    .request-info {
+        display: flex;
+        gap: 20px;
+    }
+    .request-info img {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+    .request-details {
+        flex-grow: 1;
+    }
+    .request-details h3 {
+        margin: 0 0 10px 0;
+        font-size: 1.1rem;
+    }
+    .request-details p {
+        margin: 4px 0;
+        font-size: 0.9rem;
+        color: #555;
+    }
+    .cancel-btn {
+        margin-top: 10px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        align-self: flex-end;
+    }
+    .cancel-btn:hover {
+        background: #c82333;
+    }
+    .loading {
+        text-align: center;
+        padding: 20px;
+        font-size: 1.2rem;
+        color: #666;
+    }
+    .error-message {
+        color: #dc3545;
+        background: #ffecec;
+        padding: 10px;
+        border-radius: 4px;
+        margin: 10px 0;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="main-content">
+        <div id="loading-indicator" class="loading">Загрузка ваших запросов...</div>
+        <div id="error-container" class="error-message" style="display: none;"></div>
+        <div id="requests-container"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const API_BASE = '/api/v1/exchange-proposals/';
+    const API_SENT = API_BASE + 'sent/';
+    const container = document.getElementById('requests-container');
+    const loading = document.getElementById('loading-indicator');
+    const error = document.getElementById('error-container');
+
+    function getCSRFToken() {
+        const name = 'csrftoken';
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? match[2] : '';
+    }
+
+    function showError(message) {
+        error.style.display = 'block';
+        error.textContent = message;
+    }
+
+    function hideError() {
+        error.style.display = 'none';
+    }
+
+    function renderRequests(requests) {
+        // Фильтруем по статусам pending и accepted
+        const filtered = requests.filter(r => r.status === 'pending' || r.status === 'accepted');
+
+        if (filtered.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <h3>Вы пока не отправляли запросы</h3>
+                    <p>Вы можете отправить запрос с любой карточки товара</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = filtered.map(req => `
+            <div class="request-card" data-id="${req.id}">
+                <div class="request-info">
+                    <img src="${req.ad_sender.image_url}" alt="Ваш товар" onerror="this.onerror=null;this.src='https://via.placeholder.com/120'">
+                    <div class="request-details">
+                        <h3>Запрос на обмен</h3>
+                        <p><strong>Вы предлагаете:</strong> ${req.ad_sender.title}</p>
+                        <p><strong>Хотите получить:</strong> ${req.ad_receiver.title}</p>
+                        <p><strong>Статус:</strong> ${req.status === 'pending' ? 'Ожидает' : 'Принят'}</p>
+                        <p><strong>Дата:</strong> ${new Date(req.created_at).toLocaleString()}</p>
+                    </div>
+                </div>
+                ${req.status === 'pending' ? `<button class="cancel-btn">Отменить запрос</button>` : ''}
+            </div>
+        `).join('');
+
+        document.querySelectorAll('.cancel-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const card = btn.closest('.request-card');
+                const id = card.dataset.id;
+                if (confirm('Вы уверены, что хотите отменить этот запрос?')) {
+                    try {
+                        const response = await fetch(API_BASE + `${id}/cancel/`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': getCSRFToken(),
+                                'Content-Type': 'application/json'
+                            },
+                            credentials: 'include'
+                        });
+                        if (!response.ok) {
+                            const errData = await response.json();
+                            throw new Error(errData.detail || 'Ошибка при отмене запроса');
+                        }
+                        loadRequests();
+                    } catch (err) {
+                        showError(err.message);
+                    }
+                }
+            });
+        });
+    }
+
+    async function loadRequests() {
+        loading.style.display = 'block';
+        hideError();
+        container.innerHTML = '';
+
+        try {
+            const res = await fetch(API_SENT, { credentials: 'include' });
+            if (!res.ok) {
+                throw new Error('Ошибка загрузки данных');
+            }
+            const data = await res.json();
+            renderRequests(data);
+        } catch (err) {
+            showError(err.message || 'Произошла ошибка при загрузке');
+        } finally {
+            loading.style.display = 'none';
+        }
+    }
+
+    loadRequests();
+});
+</script>
+{% endblock %}
