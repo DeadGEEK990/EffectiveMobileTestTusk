@@ -1,0 +1,1060 @@
+openapi: 3.0.3
+info:
+  title: ''
+  version: 0.0.0
+paths:
+  /api/v1/categories/:
+    get:
+      operationId: api_v1_categories_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/current-user/:
+    get:
+      operationId: api_v1_current_user_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/exchange-proposals/:
+    get:
+      operationId: api_v1_exchange_proposals_list
+      parameters:
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExchangeProposal'
+          description: ''
+    post:
+      operationId: api_v1_exchange_proposals_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExchangeProposal'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExchangeProposal'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExchangeProposal'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeProposal'
+          description: ''
+  /api/v1/exchange-proposals/{id}/:
+    get:
+      operationId: api_v1_exchange_proposals_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exchange proposal model.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeProposal'
+          description: ''
+    put:
+      operationId: api_v1_exchange_proposals_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exchange proposal model.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExchangeProposal'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExchangeProposal'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExchangeProposal'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeProposal'
+          description: ''
+    patch:
+      operationId: api_v1_exchange_proposals_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exchange proposal model.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedExchangeProposal'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedExchangeProposal'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedExchangeProposal'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeProposal'
+          description: ''
+    delete:
+      operationId: api_v1_exchange_proposals_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exchange proposal model.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/exchange-proposals/{id}/accept/:
+    post:
+      operationId: api_v1_exchange_proposals_accept_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exchange proposal model.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExchangeProposal'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExchangeProposal'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExchangeProposal'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeProposal'
+          description: ''
+  /api/v1/exchange-proposals/{id}/cancel/:
+    post:
+      operationId: api_v1_exchange_proposals_cancel_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exchange proposal model.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExchangeProposal'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExchangeProposal'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExchangeProposal'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeProposal'
+          description: ''
+  /api/v1/exchange-proposals/{id}/decline/:
+    post:
+      operationId: api_v1_exchange_proposals_decline_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this exchange proposal model.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExchangeProposal'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExchangeProposal'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExchangeProposal'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeProposal'
+          description: ''
+  /api/v1/exchange-proposals/received/:
+    get:
+      operationId: api_v1_exchange_proposals_received_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeProposal'
+          description: ''
+  /api/v1/exchange-proposals/sent/:
+    get:
+      operationId: api_v1_exchange_proposals_sent_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeProposal'
+          description: ''
+  /api/v1/items/:
+    get:
+      operationId: api_v1_items_list
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: integer
+      - in: query
+        name: category__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: condition
+        schema:
+          type: string
+          enum:
+          - new
+          - old
+        description: |-
+          * `old` - б/у
+          * `new` - новый
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedItemPreviewList'
+          description: ''
+    post:
+      operationId: api_v1_items_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemPreview'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ItemPreview'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ItemPreview'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemPreview'
+          description: ''
+  /api/v1/items/{id}/:
+    get:
+      operationId: api_v1_items_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this items model.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemPreview'
+          description: ''
+    put:
+      operationId: api_v1_items_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this items model.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemPreview'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ItemPreview'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ItemPreview'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemPreview'
+          description: ''
+    patch:
+      operationId: api_v1_items_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this items model.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedItemPreview'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedItemPreview'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedItemPreview'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemPreview'
+          description: ''
+    delete:
+      operationId: api_v1_items_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this items model.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/my-items/:
+    get:
+      operationId: api_v1_my_items_list
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: integer
+      - in: query
+        name: category__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: condition
+        schema:
+          type: string
+          enum:
+          - new
+          - old
+        description: |-
+          * `old` - б/у
+          * `new` - новый
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedItemPreviewList'
+          description: ''
+    post:
+      operationId: api_v1_my_items_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ItemCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ItemCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemCreate'
+          description: ''
+  /api/v1/my-items/{id}/:
+    get:
+      operationId: api_v1_my_items_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this items model.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemPreview'
+          description: ''
+    put:
+      operationId: api_v1_my_items_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this items model.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ItemCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ItemCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemCreate'
+          description: ''
+    patch:
+      operationId: api_v1_my_items_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this items model.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedItemCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedItemCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedItemCreate'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemCreate'
+          description: ''
+    delete:
+      operationId: api_v1_my_items_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this items model.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/schema/:
+    get:
+      operationId: api_v1_schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+components:
+  schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 50
+      required:
+      - id
+      - title
+    ConditionEnum:
+      enum:
+      - old
+      - new
+      type: string
+      description: |-
+        * `old` - б/у
+        * `new` - новый
+    ExchangeProposal:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        ad_sender:
+          allOf:
+          - $ref: '#/components/schemas/ItemPreview'
+          readOnly: true
+        ad_receiver:
+          allOf:
+          - $ref: '#/components/schemas/ItemPreview'
+          readOnly: true
+        comment:
+          type: string
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        ad_sender_id:
+          type: integer
+          writeOnly: true
+        ad_receiver_id:
+          type: integer
+          writeOnly: true
+      required:
+      - ad_receiver
+      - ad_receiver_id
+      - ad_sender
+      - ad_sender_id
+      - created_at
+      - id
+    ItemCreate:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 50
+        description:
+          type: string
+          maxLength: 500
+        image_url:
+          type: string
+          format: uri
+          maxLength: 200
+        category:
+          type: integer
+        condition:
+          $ref: '#/components/schemas/ConditionEnum'
+      required:
+      - category
+      - description
+      - image_url
+      - title
+    ItemPreview:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        title:
+          type: string
+          maxLength: 50
+        description:
+          type: string
+          maxLength: 500
+        image_url:
+          type: string
+          format: uri
+          maxLength: 200
+        category:
+          $ref: '#/components/schemas/Category'
+        condition:
+          $ref: '#/components/schemas/ConditionEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - category
+      - created_at
+      - description
+      - id
+      - image_url
+      - title
+      - user
+    PaginatedItemPreviewList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemPreview'
+    PatchedExchangeProposal:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        ad_sender:
+          allOf:
+          - $ref: '#/components/schemas/ItemPreview'
+          readOnly: true
+        ad_receiver:
+          allOf:
+          - $ref: '#/components/schemas/ItemPreview'
+          readOnly: true
+        comment:
+          type: string
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        ad_sender_id:
+          type: integer
+          writeOnly: true
+        ad_receiver_id:
+          type: integer
+          writeOnly: true
+    PatchedItemCreate:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 50
+        description:
+          type: string
+          maxLength: 500
+        image_url:
+          type: string
+          format: uri
+          maxLength: 200
+        category:
+          type: integer
+        condition:
+          $ref: '#/components/schemas/ConditionEnum'
+    PatchedItemPreview:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        title:
+          type: string
+          maxLength: 50
+        description:
+          type: string
+          maxLength: 500
+        image_url:
+          type: string
+          format: uri
+          maxLength: 200
+        category:
+          $ref: '#/components/schemas/Category'
+        condition:
+          $ref: '#/components/schemas/ConditionEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    StatusEnum:
+      enum:
+      - pending
+      - accepted
+      - declined
+      type: string
+      description: |-
+        * `pending` - Ожидает
+        * `accepted` - Принято
+        * `declined` - Отклонено
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
